@@ -3,6 +3,8 @@ import { validationResult, checkSchema, matchedData } from "express-validator"; 
 import { createUserValidationSchema } from "../utils/validationSchema.mjs";
 import { users } from "../utils/constants.mjs";
 import { resolveIndexById } from "../utils/middlewares.mjs";
+import { User } from "../models/user.model.js";
+//import jwt from "jsonwebtoken";
 
 const router = Router();
 
@@ -150,6 +152,44 @@ router.delete("/api/users/:id", resolveIndexById, (req, res) => {
 
   // Devolvemos una respuesta
   return res.status(200).send(users);
+});
+
+/* ------------------------------------ REGISTER AND LOGIN ------------------------------------ */
+// Registro de usuario
+router.post("/api/register", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    const newUser = new User({ name, email, password });
+    await newUser.save();
+    res.status(201).json({ message: "Usuario registrado con éxito" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Login de usuario
+router.post("/api/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(401).json({ message: "Credenciales inválidas" });
+    }
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Credenciales inválidas" });
+    }
+
+    // Generar un token JWT
+    // const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
+    //   expiresIn: "1h",
+    // });
+    res.status(200).json({ msg: "Ok Login!" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
 export default router;

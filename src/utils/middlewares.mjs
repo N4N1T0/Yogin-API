@@ -19,3 +19,12 @@ export const resolveIndexById = (req, res, next) => {
 
   next(); // Se pueden pasar parámetros de tipo NULL o ERROR
 };
+
+// // Middleware para proteger rutas
+// export const authMiddleware = (req, res, next) => {
+//   if (req.session.userId) {
+//     next();
+//   } else {
+//     res.status(401).json({ message: "No autorizado" });
+//   }
+// };

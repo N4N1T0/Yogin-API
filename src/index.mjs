@@ -1,6 +1,9 @@
 // Dependencias
 import express from "express";
 
+import mongoDBCon from "./db/mongo_db.mjs";
+// psw: 8Iqj5kROkkCdSZlM
+//stephanie_castro
 //Middleware
 import routes from "./routes/index.mjs";
 import cookieParser from "cookie-parser";
@@ -13,6 +16,9 @@ const app = express();
 //Middleware para las peticiones
 // ! IMP: los MIDDLEWARE deben crearse antes de la gestión de las peticiones
 app.use(express.json());
+
+// Middleware para habilitar el uso de formularios
+app.use(express.urlencoded({ extended: false }));
 
 // ! IMP: el uso de CookieParser debe ser anterior a las rutas de los MIDDLEWARE de users y products
 //app.use(cookieParser()); ! CUANDO NO ESTA "Firmada" no se le pasan parámetros
@@ -44,6 +50,8 @@ app.use(
 app.use(passport.session());
 
 app.use(routes);
+
+console.log(mongoDBCon);
 
 //Ejemplo de MIDDLEWARE simple
 const loggingMiddleware = (req, res, next) => {
