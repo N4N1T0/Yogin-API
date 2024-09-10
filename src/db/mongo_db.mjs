@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
+import dotenv from "dotenv";
+dotenv.config();
 
 const mongoDBCon = mongoose
-  .connect(
-    "mongodb+srv://stephanie_castro:8Iqj5kROkkCdSZlM@api-yoga.wla69y8.mongodb.net/?retryWrites=true&w=majority&appName=API-Yoga"
-  )
+  .connect(process.env.DB_URL)
   .then(() => {
     console.log("Connected to the Mongo Data Base");
   })

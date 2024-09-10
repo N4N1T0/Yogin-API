@@ -1,23 +1,32 @@
 import mongoose from "mongoose";
+const { ObjectId } = mongoose.Schema;
 
 const CenterSchema = mongoose.Schema({
-  name: {
-    type: String,
+  user: {
+    type: ObjectId,
+    ref: "User",
     required: true,
   },
 
-  logo: {
-    type: String,
-    required: true,
-  },
+  // address: {
+  //   type: ObjectId,
+  //   ref: "Adress",
+  // },
 
-  url: {
-    type: String,
-    required: false,
-  },
+  // name: {
+  //   type: String,
+  //   required: true,
+  // },
+
+  // logo: {
+  //   type: String,
+  //   required: true,
+  // },
+
+  // url: {
+  //   type: String,
+  //   required: false,
+  // },
 });
 
-const Center = mongoose.model("Center", CenterSchema);
-
-//module.exports = Product;
-export default Center;
+export const Center = mongoose.model("Center", CenterSchema);

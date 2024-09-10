@@ -24,6 +24,12 @@ const UserSchema = mongoose.Schema({
     default: new Date().now,
   },
 
+  role: {
+    type: String,
+    enum: ["student", "teacher", "center"], // Rol para distinguir
+    required: true,
+  },
+
   image: {
     type: String,
     required: false,

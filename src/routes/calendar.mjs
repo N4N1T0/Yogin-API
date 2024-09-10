@@ -1,8 +1,7 @@
 import { Router } from "express";
+import { Calendar } from "../models/index.js";
 
 const router = Router();
-
-const Calendar = require("../models/Calendar");
 
 // Obtener todos los calendarios
 router.get("/api/calendar", async (req, res) => {

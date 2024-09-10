@@ -6,13 +6,21 @@ const TeacherSchema = mongoose.Schema({
   user: {
     type: ObjectId,
     ref: "User",
-  },
-
-  level: {
-    type: String,
-    enum: ["N1", "N2", "N3"],
     required: true,
   },
+
+  calendars: [
+    {
+      type: ObjectId,
+      ref: "Calendar",
+    },
+  ],
+
+  // level: {
+  //   type: String,
+  //   enum: ["N1", "N2", "N3"],
+  //   required: true,
+  // },
 
   // certificate: {
   //   name: {
@@ -35,10 +43,10 @@ const TeacherSchema = mongoose.Schema({
   //   },
   // },
 
-  description: {
-    type: String,
-    required: false,
-  },
+  // description: {
+  //   type: String,
+  //   required: false,
+  // },
 
   // center: {
   //   type: ObjectId,
@@ -50,7 +58,4 @@ const TeacherSchema = mongoose.Schema({
   //}
 });
 
-const Teacher = mongoose.model("Teacher", TeacherSchema);
-
-//module.exports = Product;
-export default Teacher;
+export const Teacher = mongoose.model("Teacher", TeacherSchema);

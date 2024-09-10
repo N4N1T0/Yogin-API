@@ -8,26 +8,64 @@ const eventSchema = new mongoose.Schema(
       ref: "Calendar",
       required: true,
     },
+
     title: {
       type: String,
       required: true,
     },
-    start: {
+    startDate: {
       type: Date,
       required: true,
     },
-    end: {
+    endDate: {
       type: Date,
       required: true,
     },
-    isAllDay: {
-      type: Boolean,
-      default: false,
+
+    startTime: {
+      type: Date,
+      required: true,
+    },
+
+    endTime: {
+      type: Date,
+      required: true,
+    },
+
+    teacherId: {
+      type: ObjectId,
+      ref: "Teacher",
+      required: true,
+    },
+
+    centerId: {
+      type: ObjectId,
+      ref: "center",
+      required: true,
+    },
+
+    // isAllDay: {
+    //   type: Boolean,
+    //   default: false,
+    // },
+
+    typeYoga: {
+      type: String,
+      enum: ["Hatha", "Vinyasa", "Dharma", "Sivananda"], // Tipos de Yoga
+      required: true,
+    },
+
+    mode: {
+      type: String,
+      enum: ["Online", "Presencial"],
+    },
+
+    participants: {
+      type: Number,
+      required: true,
     },
   },
   { timestamps: true }
 );
 
-const Event = mongoose.model("Event", eventSchema);
-
-export default Event;
+export const Event = mongoose.model("Event", eventSchema);

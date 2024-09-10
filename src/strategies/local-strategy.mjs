@@ -9,7 +9,7 @@ passport.serializeUser((user, done) => {
   console.log(`Inside Serialize User`);
   console.log(user);
 
-  //Se introduce en el PASPORT el user ID en la SESSION
+  //Se introduce en el PASSPORT el user ID en la SESSION
   done(null, user.id);
 });
 

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import Event from "../models/event.model.js";
+import { Event } from "../models/index.js";
 
 const router = Router();
 
@@ -18,9 +18,15 @@ router.post("/api/events", async (req, res) => {
   const event = new Event({
     calendarId: req.body.calendarId,
     title: req.body.title,
-    start: req.body.start,
-    end: req.body.end,
-    isAllDay: req.body.isAllDay,
+    startDate: req.body.startDate,
+    endDate: req.body.endDate,
+    startTime: req.body.startTime,
+    endTime: req.body.endTime,
+    teacherId: req.body.teacherId,
+    centerId: req.body.centerId,
+    typeYoga: req.body.typeYoga,
+    mode: req.body.mode,
+    participants: req.body.participants,
   });
 
   try {
