@@ -22,16 +22,6 @@ const eventSchema = new mongoose.Schema(
       required: true,
     },
 
-    startTime: {
-      type: Date,
-      required: true,
-    },
-
-    endTime: {
-      type: Date,
-      required: true,
-    },
-
     teacherId: {
       type: ObjectId,
       ref: "Teacher",
@@ -51,18 +41,24 @@ const eventSchema = new mongoose.Schema(
 
     typeYoga: {
       type: String,
-      enum: ["Hatha", "Vinyasa", "Dharma", "Sivananda"], // Tipos de Yoga
+      enum: ["Hatha", "Vinyasa", "Dharma", "Sivananda", "Kundalini"], // Tipos de Yoga
       required: true,
     },
 
     mode: {
       type: String,
       enum: ["Online", "Presencial"],
+      required: true,
     },
 
     participants: {
       type: Number,
       required: true,
+    },
+
+    description: {
+      type: String,
+      required: false,
     },
   },
   { timestamps: true }

@@ -2,23 +2,23 @@ import mongoose from "mongoose";
 import { ObjectId } from "mongodb";
 
 const CalendarSchema = mongoose.Schema({
-  teacher: {
+  user: {
     type: ObjectId,
-    ref: "Teacher",
+    ref: "User",
+    required: false, // Es opcional para los calendarios públicos
   },
 
-  name: {
-    type: String,
-    required: true,
+  isPublic: {
+    type: Boolean,
+    default: false,
   },
-  bgColor: {
-    type: String,
-    required: true,
-  },
-  borderColor: {
-    type: String,
-    required: true,
-  },
+
+  events: [
+    {
+      type: ObjectId,
+      ref: "Event",
+    },
+  ],
 });
 
 export const Calendar = mongoose.model("Calendar", CalendarSchema);

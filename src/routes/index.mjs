@@ -13,8 +13,8 @@ const router = Router();
 router.use(users);
 router.use(teachers);
 router.use(centers);
-router.use(events);
 router.use(calendars);
+router.use(events);
 
 //router.use(products);
 //router.use(auth);

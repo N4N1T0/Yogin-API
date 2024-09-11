@@ -9,12 +9,12 @@ const TeacherSchema = mongoose.Schema({
     required: true,
   },
 
-  calendars: [
-    {
-      type: ObjectId,
-      ref: "Calendar",
-    },
-  ],
+  // calendars: [
+  //   {
+  //     type: ObjectId,
+  //     ref: "Calendar",
+  //   },
+  // ],
 
   // level: {
   //   type: String,

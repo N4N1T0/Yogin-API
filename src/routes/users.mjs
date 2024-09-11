@@ -3,7 +3,7 @@ import { validationResult, checkSchema, matchedData } from "express-validator";
 import { createUserValidationSchema } from "../utils/validationSchema.mjs";
 import { users } from "../utils/constants.mjs";
 import { resolveIndexById } from "../utils/middlewares.mjs";
-import { User, Student, Teacher, Center } from "../models/index.js";
+import { User, Student, Teacher, Center, Calendar } from "../models/index.js";
 
 const router = Router();
 
@@ -95,6 +95,8 @@ router.post(
       } else if (role === "center") {
         await Center.create({ user: newUser._id });
       }
+
+      await Calendar.create({ user: newUser._id });
 
       req.session.userId = newUser._id;
       req.session.role = newUser.role;
