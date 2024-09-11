@@ -36,14 +36,29 @@ router.get("/api/events", async (req, res) => {
       if (!userCalendar) {
         return res.status(404).json({ message: "Calendar not found" });
       }
+      // Extraer los filtros de req.query
+      const { title, startDate, endDate, teacher, center, type, modality } =
+        req.query;
 
-      // Devolver el calendario privado junto con sus eventos
-      const calendar = {
+      let query = {};
+
+      if (title) query.title = { $regex: title, $options: "i" }; // búsqueda insensible a mayúsculas
+      if (startDate) query.startDate = { $gte: new Date(startDate) };
+      if (endDate) query.endDate = { $lte: new Date(endDate) };
+      if (teacher) query.teacher = teacher;
+      if (center) query.center = center;
+      if (type) query.type = type;
+      if (modality) query.modality = modality;
+
+      const events = await Event.find(query);
+
+      // Devolver el calendario privado junto con sus eventos filtrados
+      return res.json({
         calendar: userCalendar,
-        events: userCalendar.events,
-      };
+        events: events,
+      });
 
-      return res.json(calendar);
+      // return res.json(calendar);
     }
   } catch (error) {
     res.status(500).json({ error: "Error fetching events" });
