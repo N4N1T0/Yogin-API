@@ -7,63 +7,68 @@ const router = Router();
 // Obtener eventos
 router.get("/api/events", async (req, res) => {
   try {
-    // Buscar el calendario público
-    let publicCalendar = await Calendar.findOne({ isPublic: true }).populate(
-      "events"
-    );
-
-    // Si no existe el calendario público, créalo
-    if (!publicCalendar) {
-      publicCalendar = await Calendar.create({
-        isPublic: true,
-        events: [],
-      });
-      console.log("Calendario público creado.");
-    }
-
     // Obtener el userId desde la sesión
     const userId = req.session.userId;
 
-    if (!userId) {
-      // Si no hay sesión de usuario, devolver el calendario público
-      return res.json(publicCalendar);
-    } else {
-      // Buscar el calendario asociado al userId
-      const userCalendar = await Calendar.findOne({ user: userId }).populate(
-        "events"
-      );
+    // Obtener el calendario (público o privado según el userId)
+    const calendar = userId
+      ? await Calendar.findOne({ user: userId }).populate("events")
+      : await getOrCreatePublicCalendar();
 
-      if (!userCalendar) {
-        return res.status(404).json({ message: "Calendar not found" });
-      }
-      // Extraer los filtros de req.query
-      const { title, startDate, endDate, teacher, center, type, modality } =
-        req.query;
-
-      let query = {};
-
-      if (title) query.title = { $regex: title, $options: "i" }; // búsqueda insensible a mayúsculas
-      if (startDate) query.startDate = { $gte: new Date(startDate) };
-      if (endDate) query.endDate = { $lte: new Date(endDate) };
-      if (teacher) query.teacher = teacher;
-      if (center) query.center = center;
-      if (type) query.type = type;
-      if (modality) query.modality = modality;
-
-      const events = await Event.find(query);
-
-      // Devolver el calendario privado junto con sus eventos filtrados
-      return res.json({
-        calendar: userCalendar,
-        events: events,
-      });
-
-      // return res.json(calendar);
+    if (!calendar) {
+      return res.status(404).json({ message: "Calendar not found" });
     }
+
+    console.log(calendar);
+
+    // Obtener y aplicar los filtros
+    //const filters = buildEventFilters(req.query, calendar._id);
+
+    // Consultar los eventos que cumplen con los filtros
+    // const events = await Event.find(filters);
+
+    console.log(calendar.events);
+    // Devolver el calendario junto con sus eventos filtrados
+    return res.json({
+      calendar,
+    });
   } catch (error) {
     res.status(500).json({ error: "Error fetching events" });
   }
 });
+
+// Función para obtener o crear el calendario público
+async function getOrCreatePublicCalendar() {
+  let publicCalendar = await Calendar.findOne({ isPublic: true }).populate(
+    "events"
+  );
+
+  if (!publicCalendar) {
+    publicCalendar = await Calendar.create({ isPublic: true, events: [] });
+    console.log("Calendario público creado.");
+  }
+
+  return publicCalendar;
+}
+
+// Función para construir los filtros de eventos
+// function buildEventFilters(query, calendarId) {
+//   const { title, startDate, endDate, teacher, center, type, modality } = query;
+
+//   console.log(query);
+
+//   let filters = { calendarId }; // Filtrar por el calendario actual
+
+//   if (title) filters.title = { $regex: title, $options: "i" };
+//   if (startDate) filters.startDate = { $gte: new Date(startDate) };
+//   if (endDate) filters.endDate = { $lte: new Date(endDate) };
+//   if (teacher) filters.teacher = teacher;
+//   if (center) filters.center = center;
+//   if (type) filters.type = type;
+//   if (modality) filters.modality = modality;
+
+//   return filters;
+// }
 
 // Crear un nuevo evento
 router.post("/api/events", async (req, res) => {
@@ -84,10 +89,19 @@ router.post("/api/events", async (req, res) => {
   try {
     const newEvent = await event.save();
     const calendar = await Calendar.findById(req.body.calendarId);
+    const publicCalendar = await getOrCreatePublicCalendar();
+    console.log(publicCalendar);
+
     if (calendar) {
       calendar.events.push(newEvent._id);
       await calendar.save();
     }
+
+    if (publicCalendar) {
+      publicCalendar.events.push(newEvent._id);
+      await publicCalendar.save();
+    }
+
     res.status(201).json(newEvent);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -128,10 +142,13 @@ router.patch("/api/events/:id", async (req, res) => {
 router.delete("/api/events/:id", async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
-    if (event == null) {
+    if (!event) {
       return res.status(404).json({ message: "Event not found" });
     }
-    await event.remove();
+
+    console.log(event);
+
+    await Event.deleteOne({ _id: event._id });
     res.json({ message: "Event deleted" });
   } catch (error) {
     res.status(500).json({ message: error.message });
