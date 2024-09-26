@@ -3,7 +3,14 @@ import { validationResult, checkSchema, matchedData } from "express-validator";
 import { createUserValidationSchema } from "../utils/validationSchema.mjs";
 import { users } from "../utils/constants.mjs";
 import { resolveIndexById } from "../utils/middlewares.mjs";
-import { User, Student, Teacher, Center, Calendar } from "../models/index.js";
+import {
+  User,
+  Student,
+  Teacher,
+  Center,
+  Calendar,
+  Address,
+} from "../models/index.js";
 
 const router = Router();
 
@@ -72,13 +79,44 @@ router.delete("/api/users/:id", resolveIndexById, (req, res) => {
   return res.status(200).send(users);
 });
 
+// const createRole = async (role, userId, userData = {}) => {
+//   const actions = {
+//     student: () => ({
+//       model: Student,
+//       data: { user: userId },
+//     }),
+//     teacher: async () => {
+//       const teacher = await Teacher.create({ user: userId });
+//       const student = await Student.create({ user: userId });
+//       return [
+//         { model: Teacher, instance: teacher },
+//         { model: Student, instance: student },
+//       ];
+//     },
+//     center: async () => {
+//       const address = await Address.findOrCreate(userData.address);
+//       return {
+//         model: Center,
+//         data: { user: userId, address: address._id },
+//       };
+//     },
+//   };
+
+//   // Ejecutar la acción correspondiente al rol
+//   if (actions[role]) {
+//     return await actions[role]();
+//   } else {
+//     throw new Error(`Rol no válido: ${role}`);
+//   }
+// };
+
 // 7. REGISTER User
 router.post(
   "/api/register",
   checkSchema(createUserValidationSchema),
   async (req, res) => {
     try {
-      const { name, email, password, role } = req.body;
+      const { name, email, password, role, address } = req.body;
       const dbUser = await User.findOne({ email });
 
       if (dbUser) {
@@ -88,18 +126,32 @@ router.post(
       const newUser = new User({ name, email, password, role });
       await newUser.save();
 
-      if (role === "student") {
+      // Array para guardar los roles y sus IDs
+      const roles = [];
+
+      // Crear roles según el tipo
+      if (role === "teacher" || role === "student") {
+        if (role === "teacher") {
+          await Teacher.create({ user: newUser._id });
+          roles.push("teacher");
+        }
+
         await Student.create({ user: newUser._id });
-      } else if (role === "teacher") {
-        await Teacher.create({ user: newUser._id });
+        roles.push("student");
       } else if (role === "center") {
-        await Center.create({ user: newUser._id });
+        const newAddress = await Address.findOrCreate(address);
+        await Center.create({ user: newUser._id, address: newAddress });
+        roles.push("center");
       }
 
-      await Calendar.create({ user: newUser._id });
+      // Crear el calendario según los roles establecidos
+      for (const roleType of roles) {
+        await Calendar.create({ roleType: roleType, user: newUser._id });
+      }
 
       req.session.userId = newUser._id;
       req.session.role = newUser.role;
+      req.session.initialRole = newUser.role;
 
       res.status(201).json({ message: "Usuario registrado con éxito" });
     } catch (error) {
@@ -125,6 +177,7 @@ router.post("/api/login", async (req, res) => {
 
     req.session.userId = user._id;
     req.session.role = user.role;
+    req.session.initialRole = user.role;
     req.session.visited = true;
 
     res.status(200).json({ msg: "Ok Login!" });
@@ -136,10 +189,26 @@ router.post("/api/login", async (req, res) => {
 router.get("/api/login", (req, res) => {
   console.log(req.session);
   if (req.session.userId) {
-    res.send({ userId: req.session.userId, role: req.session.role });
+    res.send({
+      userId: req.session.userId,
+      role: req.session.role,
+      initialRole: req.session.initialRole,
+    });
   } else {
     res.send({ msg: "No hay sesión iniciada" });
   }
+});
+
+router.post("/api/switch-role", (req, res) => {
+  const { role } = req.body;
+
+  req.session.role = role;
+
+  // console.log("ROL EN SWITCH-ROLE:");
+  // console.log(req.session.role);
+  // console.log(req.session.initialRole);
+
+  res.send({ role: role });
 });
 
 export default router;

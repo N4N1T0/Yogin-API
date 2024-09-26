@@ -4,3 +4,4 @@ export { Teacher } from "./teacher.model.js";
 export { Center } from "./center.model.js";
 export { Calendar } from "./calendar.model.js";
 export { Event } from "./event.model.js";
+export { Address } from "./address.model.js";
