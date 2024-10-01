@@ -186,6 +186,15 @@ router.post("/api/login", async (req, res) => {
   }
 });
 
+router.post("/api/logout", async (req, res) => {
+  try {
+    req.session.destroy();
+    res.status(200).json({ msg: "Sesión cerrada con éxito" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 router.get("/api/login", (req, res) => {
   console.log(req.session);
   if (req.session.userId) {
@@ -199,10 +208,15 @@ router.get("/api/login", (req, res) => {
   }
 });
 
-router.post("/api/switch-role", (req, res) => {
+router.patch("/api/switch-role", (req, res) => {
   const { role } = req.body;
 
+  console.log("ANTES SWITCH");
+  console.log(req.session);
+
   req.session.role = role;
+  console.log("DESPUÉS SWITCH");
+  console.log(req.session);
 
   // console.log("ROL EN SWITCH-ROLE:");
   // console.log(req.session.role);

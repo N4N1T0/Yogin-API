@@ -54,7 +54,7 @@ const eventSchema = new mongoose.Schema(
         return this.mode === "Online";
       }, // Obligatorio si el modo es Online
     },
-    addressId: {
+    address: {
       type: ObjectId,
       ref: "Address",
       required: function () {

@@ -39,9 +39,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
   session({
     key: "session_data",
-    secret: "psw123",
-    saveUninitialized: false, // Se deja en false para no crear sesión si no se modifica
-    resave: false,
+    secret: "psw123", // Asegúrate de usar un secreto fuerte y único
+    saveUninitialized: false, // No guardar sesiones vacías
+    resave: false, // No volver a guardar la sesión si no se modifica
     cookie: {
       maxAge: 60000 * 60, // 1 hora
       httpOnly: true, // Asegura que la cookie no sea accesible desde JavaScript

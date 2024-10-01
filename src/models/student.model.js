@@ -8,13 +8,6 @@ const StudentSchema = mongoose.Schema({
     required: true,
   },
 
-  bookedEvents: [
-    {
-      type: ObjectId,
-      ref: "Event", // Referencia al modelo Event
-    },
-  ],
-
   //styles: {
   // type: Array
   //}

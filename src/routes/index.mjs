@@ -7,6 +7,7 @@ import events from "../routes/events.mjs";
 import calendars from "../routes/calendars.mjs";
 import teachers from "../routes/teachers.mjs";
 import centers from "../routes/centers.mjs";
+import addresses from "../routes/addresses.mjs";
 
 const router = Router();
 
@@ -15,6 +16,7 @@ router.use(teachers);
 router.use(centers);
 router.use(calendars);
 router.use(events);
+router.use(addresses);
 
 //router.use(products);
 //router.use(auth);

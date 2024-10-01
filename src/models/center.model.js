@@ -10,7 +10,7 @@ const CenterSchema = mongoose.Schema({
 
   address: {
     type: ObjectId,
-    ref: "Adress",
+    ref: "Address",
   },
 
   // name: {
