@@ -25,3 +25,5 @@
 
 # API Tokens and Variables
 .env
+
+.vercel
