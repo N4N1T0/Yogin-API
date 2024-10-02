@@ -39,8 +39,10 @@ const corsOptions = {
     }
   },
   credentials: true, // Habilita el uso de cookies
-  methods: ["GET", "POST", "PUT", "DELETE"], // Métodos permitidos
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"], // Métodos permitidos
 };
+
+app.options("*", cors(corsOptions));
 
 app.use(cors(corsOptions));
 

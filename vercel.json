@@ -10,7 +10,7 @@
     {
       "src": "/(.*)",
       "dest": "src/index.mjs",
-      "methods": ["GET", "POST", "PUT", "PATCH", "DELETE"]
+      "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
     }
   ]
 }
