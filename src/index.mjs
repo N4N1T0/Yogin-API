@@ -21,15 +21,16 @@ const app = express();
 
 // Configuración de CORS
 const allowedOrigins = [
-  "https://yogin-website.vercel.app/", // Reemplaza esto con la URL de tu proyecto en Vercel
+  "https://yogin-website.vercel.app/",
   "http://localhost:3000",
-  "http://localhost:5173", // Permite el acceso local
-  "http://localhost:4173", // Permite el acceso local
+  "http://localhost:5173",
+  "http://localhost:4173",
 ];
 
 const corsOptions = {
-  origin: (origin, callback) => {
-    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+  origin: function (origin, callback) {
+    // Callback que se ejecuta cuando se recibe una solicitud de origen
+    if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
