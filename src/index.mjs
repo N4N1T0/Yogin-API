@@ -22,7 +22,7 @@ const app = express();
 
 // Configuración de CORS
 const allowedOrigins = [
-  "https://yogin-website.vercel.app/",
+  "https://yogin-website.vercel.app",
   "https://yogin-api.vercel.app",
   "http://localhost:3000",
   "http://localhost:5173",
@@ -31,13 +31,15 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Callback que se ejecuta cuando se recibe una solicitud de origen
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    // Permite las solicitudes de orígenes presentes en el array
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
     }
   },
+  credentials: true, // Habilita el uso de cookies
+  methods: ["GET", "POST", "PUT", "DELETE"], // Métodos permitidos
 };
 
 app.use(cors(corsOptions));
