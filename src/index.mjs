@@ -22,6 +22,7 @@ const app = express();
 // Configuración de CORS
 const allowedOrigins = [
   "https://yogin-website.vercel.app/",
+  "https://yogin-api.vercel.app",
   "http://localhost:3000",
   "http://localhost:5173",
   "http://localhost:4173",
@@ -51,13 +52,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Middleware para gestionar las sesiones
 app.use(
   session({
-    key: "session_data",
-    secret: "psw123", // Asegúrate de usar un secreto fuerte y único
+    secret: process.env.SESSION_SECRET, // Clave secreta para firmar las cookies
+    resave: false, // No volver a guardar la sesión si no ha sido modificada
     saveUninitialized: false, // No guardar sesiones vacías
-    resave: false, // No volver a guardar la sesión si no se modifica
+    store: MongoStore.create({
+      mongoUrl: process.env.DB_URL, // Conexión a tu base de datos MongoDB
+      ttl: 14 * 24 * 60 * 60, // Tiempo de vida de las sesiones (14 días en este caso)
+    }),
     cookie: {
-      maxAge: 60000 * 60, // 1 hora
-      httpOnly: true, // Asegura que la cookie no sea accesible desde JavaScript
+      maxAge: 60000 * 60, // Tiempo de vida de la cookie en milisegundos (1 hora aquí)
+      httpOnly: true, // Las cookies no son accesibles a JavaScript del cliente
     },
   })
 );
