@@ -20,9 +20,21 @@ dotenv.config();
 const app = express();
 
 // Configuración de CORS
+const allowedOrigins = [
+  "https://yogin-website.vercel.app/", // Reemplaza esto con la URL de tu proyecto en Vercel
+  "http://localhost:3000",
+  "http://localhost:5173", // Permite el acceso local
+  "http://localhost:4173", // Permite el acceso local
+];
+
 const corsOptions = {
-  origin: "http://localhost:5173", // URL del frontend
-  credentials: true, // Habilitar el envío de cookies con las solicitudes
+  origin: (origin, callback) => {
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
 };
 
 app.use(cors(corsOptions));
