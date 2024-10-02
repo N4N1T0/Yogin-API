@@ -59,7 +59,7 @@ app.use(
     resave: false, // No volver a guardar la sesión si no ha sido modificada
     saveUninitialized: false, // No guardar sesiones vacías
     store: MongoStore.create({
-      mongoUrl: process.env.DB_URL, // Conexión a tu base de datos MongoDB
+      mongoUrl: process.env.MONGODB_URI, // Conexión a tu base de datos MongoDB
       ttl: 14 * 24 * 60 * 60, // Tiempo de vida de las sesiones (14 días en este caso)
     }),
     cookie: {
