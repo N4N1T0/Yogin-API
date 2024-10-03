@@ -20,53 +20,41 @@ dotenv.config();
 // Variables
 const app = express();
 
-// Configuración de CORS
-const allowedOrigins = [
-  "https://yogin-website.vercel.app",
-  "https://yogin-api.vercel.app",
-  "http://localhost:3000",
-  "http://localhost:5173",
-  "http://localhost:4173",
-];
-
 const corsOptions = {
-  origin: function (origin, callback) {
-    // Permite las solicitudes de orígenes presentes en el array
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true, // Habilita el uso de cookies
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"], // Métodos permitidos
+  origin: [
+    "http://localhost:5173",
+    "http://localhost:4173",
+    "http://localhost:3000",
+    "https://yogin-website.vercel.app",
+    "https://yogin-api.vercel.app",
+  ], // Ajuste según sus necesidades
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
-
-app.options("*", cors(corsOptions));
 
 app.use(cors(corsOptions));
 
-// Middlewares para parsear las solicitudes
+// Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
-// CookieParser con firma
-app.use(cookieParser("secret"));
+app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Middleware para gestionar las sesiones
+// Configuración de sesiones
 app.use(
   session({
-    secret: process.env.SESSION_SECRET, // Clave secreta para firmar las cookies
-    resave: false, // No volver a guardar la sesión si no ha sido modificada
-    saveUninitialized: false, // No guardar sesiones vacías
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
     store: MongoStore.create({
-      mongoUrl: process.env.MONGODB_URI, // Conexión a tu base de datos MongoDB
-      ttl: 14 * 24 * 60 * 60, // Tiempo de vida de las sesiones (14 días en este caso)
+      mongoUrl: process.env.MONGODB_URI,
+      ttl: 60 * 60, // 1 hora
     }),
     cookie: {
-      maxAge: 60000 * 60, // Tiempo de vida de la cookie en milisegundos (1 hora aquí)
-      httpOnly: true, // Las cookies no son accesibles a JavaScript del cliente
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      maxAge: 60 * 60 * 1000, // 1 hora
     },
   })
 );

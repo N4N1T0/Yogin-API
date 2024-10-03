@@ -167,45 +167,52 @@ router.post("/api/login", async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(401).json({ message: "Credenciales inválidas" });
+      return res.status(401).json({ message: "Usuario no encontrado" });
     }
 
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
+    if (!(await user.comparePassword(password))) {
       return res.status(401).json({ message: "Credenciales inválidas" });
     }
 
     req.session.userId = user._id;
     req.session.role = user.role;
     req.session.initialRole = user.role;
-    req.session.visited = true;
 
-    res.status(200).json({ msg: "Ok Login!" });
+    res.status(200).json({
+      message: "Login exitoso",
+      user: {
+        userId: user._id,
+        role: user.role,
+        initialRole: user.role,
+      },
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-router.post("/api/logout", async (req, res) => {
-  try {
-    req.session.destroy();
-    res.status(200).json({ msg: "Sesión cerrada con éxito" });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-router.get("/api/login", (req, res) => {
-  console.log(req.session);
+// Verificar sesión
+router.get("/api/session", (req, res) => {
   if (req.session.userId) {
-    res.send({
+    res.json({
       userId: req.session.userId,
       role: req.session.role,
       initialRole: req.session.initialRole,
     });
   } else {
-    res.send({ msg: "No hay sesión iniciada" });
+    res.status(401).json({ message: "No hay sesión iniciada" });
   }
+});
+
+// Logout
+router.post("/api/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ message: "Error al cerrar sesión" });
+    }
+    res.clearCookie("connect.sid");
+    res.json({ message: "Sesión cerrada con éxito" });
+  });
 });
 
 router.patch("/api/switch-role", (req, res) => {
