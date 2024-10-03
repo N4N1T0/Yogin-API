@@ -34,6 +34,7 @@ const corsOptions = {
 };
 
 // Por favor funciona, lo único que pido es que no se genere un error de CORS
+app.options("*", cors(corsOptions)); // Para manejar las solicitudes preflight
 app.use(cors(corsOptions));
 
 // Middlewares
