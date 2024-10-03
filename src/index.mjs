@@ -33,6 +33,7 @@ const corsOptions = {
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
+// Por favor funciona, lo único que pido es que no se genere un error de CORS
 app.use(cors(corsOptions));
 
 // Middlewares
