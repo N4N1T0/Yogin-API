@@ -27,7 +27,9 @@ const corsOptions = {
     "http://localhost:3000",
     "https://yogin-website.vercel.app",
     "https://yogin-api.vercel.app",
-  ], // Ajuste según sus necesidades
+    "https://yogin-api.onrender.com/",
+    "https://yogin-website.onrender.com/",
+  ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
