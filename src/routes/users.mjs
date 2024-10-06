@@ -79,36 +79,16 @@ router.delete("/api/users/:id", resolveIndexById, (req, res) => {
   return res.status(200).send(users);
 });
 
-// const createRole = async (role, userId, userData = {}) => {
-//   const actions = {
-//     student: () => ({
-//       model: Student,
-//       data: { user: userId },
-//     }),
-//     teacher: async () => {
-//       const teacher = await Teacher.create({ user: userId });
-//       const student = await Student.create({ user: userId });
-//       return [
-//         { model: Teacher, instance: teacher },
-//         { model: Student, instance: student },
-//       ];
-//     },
-//     center: async () => {
-//       const address = await Address.findOrCreate(userData.address);
-//       return {
-//         model: Center,
-//         data: { user: userId, address: address._id },
-//       };
-//     },
-//   };
-
-//   // Ejecutar la acción correspondiente al rol
-//   if (actions[role]) {
-//     return await actions[role]();
-//   } else {
-//     throw new Error(`Rol no válido: ${role}`);
-//   }
-// };
+const cookieConfig = (req, res) => {
+  return res.cookie(
+    "sessionData",
+    JSON.stringify({
+      userId: req.session.userId,
+      role: req.session.role,
+      initialRole: req.session.initialRole,
+    })
+  );
+};
 
 // 7. REGISTER User
 router.post(
@@ -153,6 +133,8 @@ router.post(
       req.session.role = newUser.role;
       req.session.initialRole = newUser.role;
 
+      cookieConfig(req, res);
+
       res.status(201).json({ message: "Usuario registrado con éxito" });
     } catch (error) {
       res.status(400).json({ message: error.message });
@@ -178,6 +160,11 @@ router.post("/api/login", async (req, res) => {
     req.session.role = user.role;
     req.session.initialRole = user.role;
 
+    // req.signedCookies.sessionData
+    cookieConfig(req, res);
+
+    console.log(req.session.id);
+
     res.status(200).json({
       message: "Login exitoso",
       user: {
@@ -194,6 +181,8 @@ router.post("/api/login", async (req, res) => {
 // Verificar sesión
 router.get("/api/session", (req, res) => {
   if (req.session.userId) {
+    cookieConfig(req, res);
+
     res.json({
       userId: req.session.userId,
       role: req.session.role,
@@ -210,7 +199,7 @@ router.post("/api/logout", (req, res) => {
     if (err) {
       return res.status(500).json({ message: "Error al cerrar sesión" });
     }
-    res.clearCookie("connect.sid");
+    res.clearCookie("sessionData");
     res.json({ message: "Sesión cerrada con éxito" });
   });
 });
