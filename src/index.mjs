@@ -48,6 +48,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(bodyParser.urlencoded({ extended: true }));
+app.set("trust proxy", 1); // trust first proxy
 
 // Configuración de sesiones
 app.use(
