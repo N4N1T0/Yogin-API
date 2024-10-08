@@ -80,28 +80,26 @@ router.delete("/api/users/:id", resolveIndexById, (req, res) => {
 });
 
 const cookieConfig = (req, res) => {
-  return res.cookie(
+  res.cookie(
     "sessionData",
-    JSON.stringify(
-      {
-        userId: req.session.userId,
-        role: req.session.role,
-        initialRole: req.session.initialRole,
-      },
-      {
-        secure: process.env.NODE_ENV === "production",
-        httpOnly: true,
-        maxAge: 60 * 60 * 1000, // 1 hora
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        signed: true,
-        domain:
-          process.env.NODE_ENV === "production" ? ".yog-in.es" : "localhost",
-      }
-    )
+    JSON.stringify({
+      userId: req.session.userId,
+      role: req.session.role,
+      initialRole: req.session.initialRole,
+    }),
+    {
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      maxAge: 60 * 60 * 1000, // 1 hora
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      signed: true,
+      domain:
+        process.env.NODE_ENV === "production" ? ".yog-in.es" : "localhost",
+    }
   );
 };
 
-// 7. REGISTER User
+// Ruta de registro
 router.post(
   "/api/register",
   checkSchema(createUserValidationSchema),
@@ -117,16 +115,12 @@ router.post(
       const newUser = new User({ name, email, password, role });
       await newUser.save();
 
-      // Array para guardar los roles y sus IDs
       const roles = [];
-
-      // Crear roles según el tipo
       if (role === "teacher" || role === "student") {
         if (role === "teacher") {
           await Teacher.create({ user: newUser._id });
           roles.push("teacher");
         }
-
         await Student.create({ user: newUser._id });
         roles.push("student");
       } else if (role === "center") {
@@ -135,7 +129,6 @@ router.post(
         roles.push("center");
       }
 
-      // Crear el calendario según los roles establecidos
       for (const roleType of roles) {
         await Calendar.create({ roleType: roleType, user: newUser._id });
       }
@@ -147,8 +140,8 @@ router.post(
       cookieConfig(req, res);
 
       res.cookie("sessionId", req.sessionID, {
-        httpOnly: true, // Evita el acceso desde JavaScript
-        secure: process.env.NODE_ENV === "production", // Solo en HTTPS en producción
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
         maxAge: 60 * 60 * 1000, // 1 hora
       });
 
@@ -159,7 +152,7 @@ router.post(
   }
 );
 
-// 8. LOGIN User
+// Ruta de login
 router.post("/api/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -177,10 +170,7 @@ router.post("/api/login", async (req, res) => {
     req.session.role = user.role;
     req.session.initialRole = user.role;
 
-    // req.signedCookies.sessionData
     cookieConfig(req, res);
-
-    console.log(req.session.id);
 
     res.status(200).json({
       message: "Login exitoso",
