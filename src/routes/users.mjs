@@ -146,6 +146,8 @@ router.post(
       req.session.role = newUser.role;
       req.session.initialRole = newUser.role;
 
+      req.session.save();
+
       console.log(req.session);
 
       cookieConfig(req, res);
@@ -174,6 +176,8 @@ router.post("/api/login", async (req, res) => {
     req.session.userId = user._id;
     req.session.role = user.role;
     req.session.initialRole = user.role;
+
+    req.session.save();
 
     cookieConfig(req, res);
 
