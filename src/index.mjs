@@ -92,31 +92,31 @@ app.use(loggingMiddleware);
 console.log(mongoDBCon);
 
 // Ruta para la página principal con manejo de sesión y cookies
-app.get("/", (req, res) => {
-  console.log(req.session);
-  console.log(req.sessionID); // session.id
+// app.get("/", (req, res) => {
+//   console.log(req.session);
+//   console.log(req.sessionID); // session.id
 
-  // Evitar que se regenere una sesión en cada recarga
-  req.session.visited = req.session.visited || true;
+//   // Evitar que se regenere una sesión en cada recarga
+//   req.session.visited = req.session.visited || true;
 
-  // Configuración de cookies firmadas (si no está ya configurada en la cookie del cliente)
-  if (!req.cookies.sessionData) {
-    res.cookie(
-      "sessionData",
-      JSON.stringify({
-        userId: req.session.userId,
-        role: req.session.role,
-      }),
-      {
-        maxAge: 60000, // 1 minuto
-        httpOnly: true, // Asegura que la cookie no sea accesible desde JavaScript
-        signed: true, // Firma la cookie
-      }
-    );
-  }
+//   // Configuración de cookies firmadas (si no está ya configurada en la cookie del cliente)
+//   if (!req.cookies.sessionData) {
+//     res.cookie(
+//       "sessionData",
+//       JSON.stringify({
+//         userId: req.session.userId,
+//         role: req.session.role,
+//       }),
+//       {
+//         maxAge: 60000, // 1 minuto
+//         httpOnly: true, // Asegura que la cookie no sea accesible desde JavaScript
+//         signed: true, // Firma la cookie
+//       }
+//     );
+//   }
 
-  res.send({ userId: req.session.userId, role: req.session.role });
-});
+//   res.send({ userId: req.session.userId, role: req.session.role });
+// });
 
 // Configuración del puerto y escucha de la aplicación
 const PORT = process.env.PORT || 3000;
