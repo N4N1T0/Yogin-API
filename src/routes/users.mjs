@@ -146,13 +146,26 @@ router.post(
       req.session.role = newUser.role;
       req.session.initialRole = newUser.role;
 
-      req.session.save();
+      req.session.save((err) => {
+        if (err) {
+          return res
+            .status(500)
+            .json({ message: "Error al guardar la sesión" });
+        }
+      });
 
       console.log(req.session);
 
       cookieConfig(req, res);
 
-      res.status(201).json({ message: "Usuario registrado con éxito" });
+      res.status(201).json({
+        message: "Usuario registrado con éxito",
+        user: {
+          userId: req.session.userId,
+          role: req.session.role,
+          initialRole: req.session.role,
+        },
+      });
     } catch (error) {
       res.status(400).json({ message: error.message });
     }
@@ -177,7 +190,13 @@ router.post("/api/login", async (req, res) => {
     req.session.role = user.role;
     req.session.initialRole = user.role;
 
-    req.session.save();
+    req.session.save((err) => {
+      if (err) {
+        return res.status(500).json({ message: "Error al guardar la sesión" });
+      }
+    });
+
+    console.log(req.session);
 
     cookieConfig(req, res);
 
@@ -216,6 +235,7 @@ router.post("/api/logout", (req, res) => {
       return res.status(500).json({ message: "Error al cerrar sesión" });
     }
     res.clearCookie("sessionData");
+    res.clearCookie("sessionId");
     res.json({ message: "Sesión cerrada con éxito" });
   });
 });
