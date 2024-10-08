@@ -13,9 +13,9 @@ export const setCookies = (req, res) => {
   res.cookie(
     "sessionData",
     JSON.stringify({
-      userId: req.session.userId,
-      role: req.session.role,
-      initialRole: req.session.initialRole,
+      userId: req.session?.userId,
+      role: req.session?.role,
+      initialRole: req.session?.initialRole,
     }),
     cookiesConfig // Usar la configuración de cookies
   );

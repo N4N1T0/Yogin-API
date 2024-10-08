@@ -70,9 +70,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use((req, res, next) => {
-  if (req.session && req.session.userId) {
-    setCookies(req, res); // Configura cookies en cada solicitud
-  }
+  setCookies(req, res); // Configura cookies en cada solicitud
   next();
 });
 
