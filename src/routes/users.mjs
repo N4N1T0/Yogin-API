@@ -154,6 +154,7 @@ router.post(
         }
       });
 
+      console.log("SESSION REGISTER");
       console.log(req.session);
 
       cookieConfig(req, res);
@@ -196,6 +197,7 @@ router.post("/api/login", async (req, res) => {
       }
     });
 
+    console.log("SESSION LOGIN");
     console.log(req.session);
 
     cookieConfig(req, res);
@@ -215,6 +217,10 @@ router.post("/api/login", async (req, res) => {
 
 // Verificar sesión
 router.get("/api/session", (req, res) => {
+  console.log("SESSION BEFORE GET SESSION");
+  console.log(req.session);
+  console.log(req.session.userId);
+
   if (req.session.userId) {
     cookieConfig(req, res);
 
