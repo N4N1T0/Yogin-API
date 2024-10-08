@@ -69,6 +69,13 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use((req, res, next) => {
+  if (req.session && req.session.userId) {
+    setCookies(req, res); // Configura cookies en cada solicitud
+  }
+  next();
+});
+
 // Middleware de rutas
 app.use(routes);
 
@@ -110,13 +117,6 @@ console.log(mongoDBCon);
 
 //   res.send({ userId: req.session.userId, role: req.session.role });
 // });
-
-app.use((req, res, next) => {
-  if (req.session && req.session.userId) {
-    setCookies(req, res); // Configura cookies en cada solicitud
-  }
-  next();
-});
 
 // Configuración del puerto y escucha de la aplicación
 const PORT = process.env.PORT || 3000;
