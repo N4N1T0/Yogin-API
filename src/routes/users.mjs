@@ -1,8 +1,11 @@
 import { Router } from "express";
 import { validationResult, checkSchema, matchedData } from "express-validator";
-import { createUserValidationSchema } from "../utils/validationSchema.mjs";
-import { users } from "../utils/constants.mjs";
-import { resolveIndexById } from "../utils/middlewares.mjs";
+import {
+  users,
+  createUserValidationSchema,
+  resolveIndexById,
+  setCookies,
+} from "../utils/index.mjs";
 import {
   User,
   Student,
@@ -79,35 +82,6 @@ router.delete("/api/users/:id", resolveIndexById, (req, res) => {
   return res.status(200).send(users);
 });
 
-const cookieConfig = (req, res) => {
-  res.cookie(
-    "sessionData",
-    JSON.stringify({
-      userId: req.session.userId,
-      role: req.session.role,
-      initialRole: req.session.initialRole,
-    }),
-    {
-      secure: process.env.NODE_ENV === "production",
-      httpOnly: true,
-      maxAge: 60 * 60 * 1000, // 1 hora
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-      signed: true,
-      domain:
-        process.env.NODE_ENV === "production" ? ".yog-in.es" : "localhost",
-    }
-  );
-
-  res.cookie("sessionId", req.session.id, {
-    secure: process.env.NODE_ENV === "production",
-    httpOnly: true,
-    maxAge: 60 * 60 * 1000, // 1 hora
-    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-    signed: true,
-    domain: process.env.NODE_ENV === "production" ? ".yog-in.es" : "localhost",
-  });
-};
-
 // Ruta de registro
 router.post(
   "/api/register",
@@ -157,7 +131,7 @@ router.post(
       console.log("SESSION REGISTER");
       console.log(req.session);
 
-      cookieConfig(req, res);
+      setCookies(req, res);
 
       res.status(201).json({
         message: "Usuario registrado con éxito",
@@ -200,7 +174,7 @@ router.post("/api/login", async (req, res) => {
     console.log("SESSION LOGIN");
     console.log(req.session);
 
-    cookieConfig(req, res);
+    setCookies(req, res);
 
     res.status(200).json({
       message: "Login exitoso",
@@ -222,7 +196,7 @@ router.get("/api/session", (req, res) => {
   console.log(req.session.userId);
 
   if (req.session.userId) {
-    cookieConfig(req, res);
+    setCookies(req, res);
 
     res.json({
       userId: req.session.userId,

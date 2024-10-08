@@ -13,6 +13,7 @@ import session from "express-session";
 import passport from "passport";
 import cors from "cors";
 import dotenv from "dotenv";
+import { cookiesConfig, setCookies } from "./utils/cookiesConfig.mjs";
 
 // Configure dotenv to load environment variables
 dotenv.config();
@@ -60,15 +61,7 @@ app.use(
       mongoUrl: process.env.MONGODB_URI,
       ttl: 60 * 60, // 1 hora
     }),
-    cookie: {
-      secure: process.env.NODE_ENV === "production",
-      httpOnly: true,
-      maxAge: 60 * 60 * 1000, // 1 hora
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-      signed: true,
-      domain:
-        process.env.NODE_ENV === "production" ? ".yog-in.es" : "localhost",
-    },
+    cookie: cookiesConfig,
   })
 );
 
@@ -117,6 +110,13 @@ console.log(mongoDBCon);
 
 //   res.send({ userId: req.session.userId, role: req.session.role });
 // });
+
+app.use((req, res, next) => {
+  if (req.session && req.session.userId) {
+    setCookies(req, res); // Configura cookies en cada solicitud
+  }
+  next();
+});
 
 // Configuración del puerto y escucha de la aplicación
 const PORT = process.env.PORT || 3000;
