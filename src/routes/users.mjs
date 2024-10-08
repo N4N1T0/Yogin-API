@@ -146,6 +146,12 @@ router.post(
 
       cookieConfig(req, res);
 
+      res.cookie("sessionId", req.sessionID, {
+        httpOnly: true, // Evita el acceso desde JavaScript
+        secure: process.env.NODE_ENV === "production", // Solo en HTTPS en producción
+        maxAge: 60 * 60 * 1000, // 1 hora
+      });
+
       res.status(201).json({ message: "Usuario registrado con éxito" });
     } catch (error) {
       res.status(400).json({ message: error.message });

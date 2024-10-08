@@ -36,7 +36,7 @@ const corsOptions = {
   ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ["Content-Type", "Authorization", "Set-Cookie"],
 };
 
 // Por favor funciona, lo único que pido es que no se genere un error de CORS
