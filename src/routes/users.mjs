@@ -120,11 +120,12 @@ router.post(
       req.session.role = newUser.role;
       req.session.initialRole = newUser.role;
 
-      await new Promise((resolve, reject) => {
-        req.session.save((err) => {
-          if (err) reject(err);
-          else resolve();
-        });
+      req.session.save((err) => {
+        if (err) {
+          return res
+            .status(500)
+            .json({ message: "Error al guardar la sesión" });
+        }
       });
 
       console.log("SESSION REGISTER");
@@ -132,7 +133,7 @@ router.post(
 
       setCookies(req, res);
 
-      console.log(res.signedCookies);
+      console.log(res.cookies);
 
       res.status(201).json({
         message: "Usuario registrado con éxito",
@@ -166,11 +167,10 @@ router.post("/api/login", async (req, res) => {
     req.session.role = user.role;
     req.session.initialRole = user.role;
 
-    await new Promise((resolve, reject) => {
-      req.session.save((err) => {
-        if (err) reject(err);
-        else resolve();
-      });
+    req.session.save((err) => {
+      if (err) {
+        return res.status(500).json({ message: "Error al guardar la sesión" });
+      }
     });
 
     console.log("SESSION LOGIN");
@@ -178,7 +178,7 @@ router.post("/api/login", async (req, res) => {
 
     setCookies(req, res);
 
-    console.log(res.signedCookies);
+    console.log(res.cookies);
 
     res.status(200).json({
       message: "Login exitoso",

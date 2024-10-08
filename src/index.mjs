@@ -23,11 +23,16 @@ const app = express();
 
 const corsOptions = {
   origin: [
+    //LOCALHOST
     "http://localhost:5173",
     "http://localhost:4173",
     "http://localhost:3000",
+
+    //VERCEL
     "https://yogin-website.vercel.app",
-    "https://yogin-api.vercel.app",
+    "https://yogin-api-2.vercel.app",
+
+    //RENDER
     "https://yogin-api.onrender.com",
     "https://yogin-website.onrender.com",
     "https://yog-in.es",
@@ -49,7 +54,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(bodyParser.urlencoded({ extended: true }));
-app.set("trust proxy", 1); // trust first proxy
+app.set("trust proxy", true); // trust first proxy
 
 // Configuración de sesiones
 app.use(
@@ -57,10 +62,12 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    name: "session",
     store: MongoStore.create({
       mongoUrl: process.env.MONGODB_URI,
       ttl: 60 * 60, // 1 hora
     }),
+    proxy: true,
     cookie: cookiesConfig,
   })
 );
