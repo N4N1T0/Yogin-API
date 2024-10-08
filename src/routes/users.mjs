@@ -97,6 +97,15 @@ const cookieConfig = (req, res) => {
         process.env.NODE_ENV === "production" ? ".yog-in.es" : "localhost",
     }
   );
+
+  res.cookie("sessionId", req.session.id, {
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+    maxAge: 60 * 60 * 1000, // 1 hora
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    signed: true,
+    domain: process.env.NODE_ENV === "production" ? ".yog-in.es" : "localhost",
+  });
 };
 
 // Ruta de registro
@@ -137,13 +146,9 @@ router.post(
       req.session.role = newUser.role;
       req.session.initialRole = newUser.role;
 
-      cookieConfig(req, res);
+      console.log(req.session);
 
-      res.cookie("sessionId", req.sessionID, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 60 * 60 * 1000, // 1 hora
-      });
+      cookieConfig(req, res);
 
       res.status(201).json({ message: "Usuario registrado con éxito" });
     } catch (error) {
