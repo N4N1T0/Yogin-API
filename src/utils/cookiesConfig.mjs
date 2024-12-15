@@ -6,7 +6,11 @@ export const cookiesConfig = {
   maxAge: 60 * 60 * 1000, // 1 hora
   sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
   signed: true,
-  domain: process.env.NODE_ENV === "production" ? ".yog-in.es" : "localhost",
+  // domain: process.env.NODE_ENV === "production" ? ".yog-in.es" : "localhost",
+  domain:
+    process.env.NODE_ENV === "production"
+      ? "yogin-api-lilac.vercel.app"
+      : "localhost",
 };
 
 export const setCookies = (req, res) => {
