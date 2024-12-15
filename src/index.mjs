@@ -31,6 +31,8 @@ const corsOptions = {
     //VERCEL
     "https://yogin-website.vercel.app",
     "https://yogin-api-2.vercel.app",
+    "https://yogin-website-beta.vercel.app",
+    "https://yogin-api-lilac.vercel.app",
 
     //RENDER
     "https://yogin-api.onrender.com",
