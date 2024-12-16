@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { Event, Calendar, Address, Center } from "../models/index.js";
+import passport from "../strategies/jwt-strategy.mjs";
 
 const router = Router();
 
@@ -87,54 +88,58 @@ async function getOrCreatePublicCalendar() {
 /* -------------------------------------------- CRUD -------------------------------------------- */
 
 // 1.1) SELECT - Obtener eventos
-router.get("/api/events", async (req, res) => {
-  try {
-    const { userId } = req.session;
-    const { roleType } = req.query; // Obtenemos roleType desde los parámetros de la consulta
+router.get(
+  "/api/events",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const { userId } = await req.user;
+      const { roleType } = req.query; // Obtenemos roleType desde los parámetros de la consulta
 
-    if (!roleType) {
-      return res.status(400).json({ message: "roleType is required" });
-    }
+      if (!roleType) {
+        return res.status(400).json({ message: "roleType is required" });
+      }
 
-    // console.log("ROLETYPE:", roleType);
+      // console.log("ROLETYPE:", roleType);
 
-    let calendar;
+      let calendar;
 
-    // Obtener el calendario según el roleType
-    if (roleType === "public") {
-      calendar = await getOrCreatePublicCalendar();
-    } else if (userId) {
-      calendar = await Calendar.findOne({
-        user: userId,
-        roleType: roleType,
-      }).populate({
-        path: "events",
-        populate: {
-          path: "address",
-          model: "Address",
-        },
+      // Obtener el calendario según el roleType
+      if (roleType === "public") {
+        calendar = await getOrCreatePublicCalendar();
+      } else if (userId) {
+        calendar = await Calendar.findOne({
+          user: userId,
+          roleType: roleType,
+        }).populate({
+          path: "events",
+          populate: {
+            path: "address",
+            model: "Address",
+          },
+        });
+      } else {
+        return res.status(403).json({
+          message: "User not authorized to access private calendars.",
+        });
+      }
+
+      if (!calendar) {
+        return res.status(404).json({ message: "Calendar not found" });
+      }
+
+      //console.log(calendar);
+
+      // Devolver el calendario con sus eventos y la ubicación
+      return res.json({
+        calendar,
       });
-    } else {
-      return res
-        .status(403)
-        .json({ message: "User not authorized to access private calendars." });
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      res.status(500).json({ error: "Error fetching events" });
     }
-
-    if (!calendar) {
-      return res.status(404).json({ message: "Calendar not found" });
-    }
-
-    //console.log(calendar);
-
-    // Devolver el calendario con sus eventos y la ubicación
-    return res.json({
-      calendar,
-    });
-  } catch (error) {
-    console.error("Error fetching events:", error);
-    res.status(500).json({ error: "Error fetching events" });
   }
-});
+);
 
 // 1.2) SELECT (ID) - Obtener un evento por ID
 router.get("/api/events/:id", async (req, res) => {
@@ -187,58 +192,64 @@ router.post("/api/events", async (req, res) => {
 });
 
 // 2.2) CREATE - BOOKED EVENTS : Añadir evento a CALENDAR de Student
-router.post("/api/events/:id", async (req, res) => {
-  try {
-    const eventId = req.params.id;
-    const { userId, role } = req.session; // Usuario autenticado (de la sesión)
+router.post(
+  "/api/events/:id",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const eventId = req.params.id;
+      const { userId, role } = await req.user; // Usuario autenticado (de la sesión)
 
-    // 1. Obtener el evento por ID
-    const event = await Event.findById(eventId);
+      // 1. Obtener el evento por ID
+      const event = await Event.findById(eventId);
 
-    if (!event) {
-      return res.status(404).json({ message: "Evento no encontrado" });
-    }
+      if (!event) {
+        return res.status(404).json({ message: "Evento no encontrado" });
+      }
 
-    const { participants } = event; // Número de participantes permitidos
+      const { participants } = event; // Número de participantes permitidos
 
-    // 2. Contar cuántos estudiantes ya han reservado este evento
-    const totalBookings = await Calendar.countDocuments({
-      events: eventId, // Buscar estudiantes que ya tienen reservado este evento
-      roleType: role,
-    });
+      // 2. Contar cuántos estudiantes ya han reservado este evento
+      const totalBookings = await Calendar.countDocuments({
+        events: eventId, // Buscar estudiantes que ya tienen reservado este evento
+        roleType: role,
+      });
 
-    // 3. Verificar si todavía hay espacio para nuevos participantes
-    if (totalBookings >= participants) {
-      return res.status(400).json({ message: "El evento está lleno" });
-    }
+      // 3. Verificar si todavía hay espacio para nuevos participantes
+      if (totalBookings >= participants) {
+        return res.status(400).json({ message: "El evento está lleno" });
+      }
 
-    // 4. Obtener el calendario del estudiante (roleType: "STUDENT")
-    const studentCalendar = await Calendar.findOne({
-      user: userId,
-      roleType: "student",
-    });
-    if (!studentCalendar) {
+      // 4. Obtener el calendario del estudiante (roleType: "STUDENT")
+      const studentCalendar = await Calendar.findOne({
+        user: userId,
+        roleType: "student",
+      });
+      if (!studentCalendar) {
+        return res
+          .status(404)
+          .json({ message: "Calendario del estudiante no encontrado" });
+      }
+
+      // 5. Verificar si el evento ya está reservado en el calendario del estudiante
+      if (studentCalendar.events.includes(eventId)) {
+        return res
+          .status(400)
+          .json({ message: "Ya has reservado este evento" });
+      }
+
+      // 6. Añadir el evento al calendario del estudiante
+      studentCalendar.events.push(eventId);
+      await studentCalendar.save();
+
       return res
-        .status(404)
-        .json({ message: "Calendario del estudiante no encontrado" });
+        .status(200)
+        .json({ message: "Evento reservado con éxito", event });
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
     }
-
-    // 5. Verificar si el evento ya está reservado en el calendario del estudiante
-    if (studentCalendar.events.includes(eventId)) {
-      return res.status(400).json({ message: "Ya has reservado este evento" });
-    }
-
-    // 6. Añadir el evento al calendario del estudiante
-    studentCalendar.events.push(eventId);
-    await studentCalendar.save();
-
-    return res
-      .status(200)
-      .json({ message: "Evento reservado con éxito", event });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
   }
-});
+);
 
 // 3) UPDATE - Actualizar un evento por ID
 router.patch("/api/events/:id", async (req, res) => {
@@ -308,39 +319,47 @@ async function removeEventFromCalendars(eventId, calendarIds) {
 }
 
 // Ruta DELETE para eliminar un evento por ID
-router.delete("/api/events/:id", async (req, res) => {
-  try {
-    const eventId = req.params.id;
-    const event = await Event.findById(eventId);
+router.delete(
+  "/api/events/:id",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const eventId = req.params.id;
+      const event = await Event.findById(eventId);
 
-    if (!event) {
-      return res.status(404).json({ message: "Event not found" });
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+
+      const { userId, role } = await req.user; // Usuario autenticado (de la sesión)
+
+      // Obtener los calendarios relevantes basados en el rol del usuario y el eventId
+      const calendarIds = await getCalendarsToRemoveEvent(
+        userId,
+        role,
+        eventId
+      );
+
+      if (calendarIds.length === 0) {
+        return res
+          .status(404)
+          .json({ message: "No calendars found containing the event" });
+      }
+
+      // Eliminar el evento de los calendarios encontrados
+      await removeEventFromCalendars(eventId, calendarIds);
+
+      // Si es profesor, eliminar el evento completamente
+      if (role === "teacher") {
+        await Event.deleteOne({ _id: eventId });
+        return res.json({ message: "Event deleted from all references" });
+      }
+
+      return res.json({ message: "Event removed from your calendar" });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
     }
-
-    const { userId, role } = req.session; // Usuario autenticado (de la sesión)
-
-    // Obtener los calendarios relevantes basados en el rol del usuario y el eventId
-    const calendarIds = await getCalendarsToRemoveEvent(userId, role, eventId);
-
-    if (calendarIds.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No calendars found containing the event" });
-    }
-
-    // Eliminar el evento de los calendarios encontrados
-    await removeEventFromCalendars(eventId, calendarIds);
-
-    // Si es profesor, eliminar el evento completamente
-    if (role === "teacher") {
-      await Event.deleteOne({ _id: eventId });
-      return res.json({ message: "Event deleted from all references" });
-    }
-
-    return res.json({ message: "Event removed from your calendar" });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
   }
-});
+);
 
 export default router;
