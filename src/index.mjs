@@ -1,19 +1,15 @@
 import express from "express";
 import mongoDBCon from "./db/mongo_db.mjs";
-import MongoStore from "connect-mongo";
+import routes from "./routes/index.mjs";
+import cookieParser from "cookie-parser";
+import bodyParser from "body-parser";
+import cors from "cors";
+import dotenv from "dotenv";
+import passport from "./strategies/jwt-strategy.mjs";
 
 // psw: 8Iqj5kROkkCdSZlM
 //stephanie_castro
 //Middleware
-
-import routes from "./routes/index.mjs";
-import cookieParser from "cookie-parser";
-import bodyParser from "body-parser";
-import session from "express-session";
-import passport from "passport";
-import cors from "cors";
-import dotenv from "dotenv";
-import { cookiesConfig, setCookies } from "./utils/cookiesConfig.mjs";
 
 // Configure dotenv to load environment variables
 dotenv.config();
@@ -21,6 +17,7 @@ dotenv.config();
 // Variables
 const app = express();
 
+// ---> MEJOR USAR ENVIRONMENT VARIABLES
 const corsOptions = {
   origin: [
     //LOCALHOST
@@ -54,34 +51,12 @@ app.use(cors(corsOptions));
 // Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser(process.env.COOKIE_SECRET));
+app.use(cookieParser()); // ---> No se necesita el secreto con los JWT
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("trust proxy", true); // trust first proxy
 
-// Configuración de sesiones
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    name: "session",
-    store: MongoStore.create({
-      mongoUrl: process.env.MONGODB_URI,
-      ttl: 60 * 60, // 1 hora
-    }),
-    proxy: true,
-    cookie: cookiesConfig,
-  })
-);
-
-// Integrar Passport
-app.use(passport.initialize());
-app.use(passport.session());
-
-app.use((req, res, next) => {
-  setCookies(req, res); // Configura cookies en cada solicitud
-  next();
-});
+// Initialize passport
+passport.initialize();
 
 // Middleware de rutas
 app.use(routes);
@@ -96,8 +71,15 @@ const loggingMiddleware = (req, res, next) => {
 app.use(loggingMiddleware);
 
 // Conexión a la base de datos
-console.log(mongoDBCon);
+await mongoDBCon;
 
+// Configuración del puerto y escucha de la aplicación
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Running on Port ${PORT}`);
+});
+
+// ---> INNECESARIO
 // Ruta para la página principal con manejo de sesión y cookies
 // app.get("/", (req, res) => {
 //   console.log(req.session);
@@ -124,9 +106,3 @@ console.log(mongoDBCon);
 
 //   res.send({ userId: req.session.userId, role: req.session.role });
 // });
-
-// Configuración del puerto y escucha de la aplicación
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Running on Port ${PORT}`);
-});
