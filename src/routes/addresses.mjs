@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { Address, Event } from "../models/index.js"; // Asegúrate de que los modelos estén correctamente importados
+import { Address } from "../models/index.js"; // Asegúrate de que los modelos estén correctamente importados
 
 const router = Router();
 
@@ -25,11 +25,9 @@ router.get("/api/addresses", async (req, res) => {
     res.json(usedAddresses);
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({
-        message: "Error al obtener las direcciones utilizadas en eventos",
-      });
+    res.status(500).json({
+      message: "Error al obtener las direcciones utilizadas en eventos",
+    });
   }
 });
 

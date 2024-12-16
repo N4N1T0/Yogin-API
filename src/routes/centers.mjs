@@ -9,7 +9,7 @@ router.get("/api/centers", async (req, res) => {
 
     res.json(centers);
   } catch (error) {
-    res.status(500).json({ message: "Error al obtener centros" });
+    res.status(500).json({ message: "Error al obtener centros", error });
   }
 });
 

@@ -10,7 +10,7 @@ router.get("/api/teachers", async (req, res) => {
     console.log(teachers); // Muestra todos los datos del Teacher y el 'name' del User
     res.json(teachers);
   } catch (error) {
-    res.status(500).json({ message: "Error al obtener profesores" });
+    res.status(500).json({ message: "Error al obtener profesores", error });
   }
 });
 

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { users } from "../utils/constants.mjs";
+// import { users } from "../utils/constants.mjs";
 import passport from "passport";
 import "../strategies/local-strategy.mjs";
 

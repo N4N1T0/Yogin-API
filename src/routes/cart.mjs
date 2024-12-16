@@ -2,6 +2,7 @@ import { Router } from "express";
 
 const router = Router();
 
+// ---> Esto seria el único problema que tenemos sin el EXPRESS SESSION, pero de todas maneras seria mejor manejarlo en el Frontend
 router.post("/api/cart", (req, res) => {
   if (!req.session.user) return res.sendStatus(401);
 
