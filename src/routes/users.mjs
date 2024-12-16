@@ -275,7 +275,6 @@ router.get(
   async (req, res) => {
     const user = await req.user; // El usuario está en `req.user` gracias a Passport
 
-    console.log("🚀 ~ user:", user);
     if (!user) {
       return res.status(401).json({ message: "No hay sesión iniciada" });
     }
