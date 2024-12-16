@@ -7,7 +7,7 @@ export const generateJWT = (user) => {
     role: user.role,
     initialRole: user.role,
   }; // Puedes agregar más datos al payload
-  const token = jwt.sign(payload, "your_jwt_secret", { expiresIn: "72h" }); // Ajusta el tiempo de expiración según necesites
+  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "72h" }); // Ajusta el tiempo de expiración según necesites
   return token;
 };
 

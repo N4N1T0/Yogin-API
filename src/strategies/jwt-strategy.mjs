@@ -3,8 +3,6 @@ import { Strategy, ExtractJwt } from "passport-jwt";
 import passport from "passport";
 import { getUserFromJwt } from "../utils/auth-utils.mjs";
 
-const jwtSecret = "your_jwt_secret"; // Guarda esta clave en las variables de entorno en producción
-
 // Configura la estrategia de JWT
 const opts = {
   jwtFromRequest: ExtractJwt.fromExtractors([
@@ -14,7 +12,7 @@ const opts = {
       }
     },
   ]),
-  secretOrKey: jwtSecret,
+  secretOrKey: process.env.JWT_SECRET,
 };
 
 passport.use(
