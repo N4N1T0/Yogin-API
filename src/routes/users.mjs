@@ -4,7 +4,6 @@ import {
   createUserValidationSchema,
   resolveUserById,
   setCookies,
-  cookiesConfig,
 } from "../utils/index.mjs";
 import {
   User,
@@ -291,7 +290,7 @@ router.get(
 router.post("/api/logout", (_req, res) => {
   try {
     // Limpia las cookies asociadas al JWT
-    res.clearCookie("sessionToken", cookiesConfig.maxAge === null); // Pasar «options.maxAge» está obsoleto. En la versión 5.0.0 de Express
+    res.clearCookie("sessionToken");
 
     // Puedes también enviar una respuesta indicando éxito
     res.status(200).json({ message: "Sesión cerrada con éxito" });
