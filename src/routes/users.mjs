@@ -286,13 +286,20 @@ router.get(
   }
 );
 
-// 10. Logout
 router.post("/api/logout", (_req, res) => {
   try {
-    // Limpia las cookies asociadas al JWT
-    res.clearCookie("sessionToken");
+    // Configuración para evitar almacenamiento en caché
+    res.set("Cache-Control", "no-store");
 
-    // Puedes también enviar una respuesta indicando éxito
+    // Limpia la cookie del lado del cliente
+    res.clearCookie("sessionToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // Asegura en producción
+      sameSite: "strict", // Protege contra ataques CSRF
+      expires: new Date(0), // Expiración inmediata
+    });
+
+    // Respuesta de éxito
     res.status(200).json({ message: "Sesión cerrada con éxito" });
   } catch (error) {
     console.error("Error al cerrar sesión:", error);
