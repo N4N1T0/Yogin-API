@@ -8,10 +8,15 @@ export const cookiesConfig = {
   domain:
     process.env.NODE_ENV === "production"
       ? "yogin-api-lilac.vercel.app"
-      : undefined,
+      : "localhost",
 };
 
 export const setCookies = (_req, res, token) => {
   // Establecer el token JWT en una cookie
   res.cookie("sessionToken", token, cookiesConfig);
+};
+
+export const clearCookies = (res) => {
+  // Limpiar la cookie del lado del cliente
+  res.clearCookie("sessionToken", cookiesConfig.maxAge === null);
 };

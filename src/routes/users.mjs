@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { validationResult, checkSchema, matchedData } from "express-validator";
 import {
+  cookiesConfig,
   createUserValidationSchema,
   resolveUserById,
   setCookies,
@@ -286,25 +287,24 @@ router.get(
   }
 );
 
-router.post("/api/logout", (_req, res) => {
-  try {
-    // Configuración para evitar almacenamiento en caché
-    res.set("Cache-Control", "no-store");
+router.post(
+  "/api/logout",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    try {
+      // Configuración para evitar almacenamiento en caché
+      res.set("Cache-Control", "no-store");
 
-    // Limpia la cookie del lado del cliente
-    res.clearCookie("sessionToken", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Asegura en producción
-      sameSite: "strict", // Protege contra ataques CSRF
-      expires: new Date(0), // Expiración inmediata
-    });
-
-    // Respuesta de éxito
-    res.status(200).json({ message: "Sesión cerrada con éxito" });
-  } catch (error) {
-    console.error("Error al cerrar sesión:", error);
-    res.status(500).json({ message: "Error al cerrar sesión" });
+      // Respuesta de éxito
+      res
+        .clearCookie("sessionToken", cookiesConfig.maxAge === null)
+        .status(200)
+        .json({ message: "Sesión cerrada con éxito" });
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+      res.status(500).json({ message: "Error al cerrar sesión" });
+    }
   }
-});
+);
 
 export default router;
