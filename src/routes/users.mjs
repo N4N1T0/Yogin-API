@@ -1,10 +1,10 @@
 import { Router } from "express";
 import { validationResult, checkSchema, matchedData } from "express-validator";
 import {
+  cookiesConfig,
   createUserValidationSchema,
   resolveUserById,
   setCookies,
-  cookiesConfig,
 } from "../utils/index.mjs";
 import {
   User,
@@ -287,18 +287,24 @@ router.get(
   }
 );
 
-// 10. Logout
-router.post("/api/logout", (_req, res) => {
-  try {
-    // Limpia las cookies asociadas al JWT
-    res.clearCookie("sessionToken", cookiesConfig.maxAge === null); // Pasar «options.maxAge» está obsoleto. En la versión 5.0.0 de Express
+router.post(
+  "/api/logout",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    try {
+      // Configuración para evitar almacenamiento en caché
+      res.set("Cache-Control", "no-store");
 
-    // Puedes también enviar una respuesta indicando éxito
-    res.status(200).json({ message: "Sesión cerrada con éxito" });
-  } catch (error) {
-    console.error("Error al cerrar sesión:", error);
-    res.status(500).json({ message: "Error al cerrar sesión" });
+      // Respuesta de éxito
+      res
+        .clearCookie("sessionToken", cookiesConfig.maxAge === null)
+        .status(200)
+        .json({ message: "Sesión cerrada con éxito" });
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+      res.status(500).json({ message: "Error al cerrar sesión" });
+    }
   }
-});
+);
 
 export default router;
